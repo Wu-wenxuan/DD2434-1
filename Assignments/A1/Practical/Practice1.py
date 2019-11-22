@@ -187,7 +187,7 @@ if ex11:
     plt.plot(X, t_noNoise, 'o', color='black')
     plt.xlabel('$x$', fontsize=16)
     plt.ylabel('$y$', fontsize=16)
-    plt.title("Without noise")
+    plt.title("Without noise", fontsize=24)
     plt.show()
 
     noise = True
@@ -201,7 +201,7 @@ if ex11:
     plt.plot(X, f_Noise, 'o', color='black')
     plt.xlabel('$x$', fontsize=16)
     plt.ylabel('$y$', fontsize=16)
-    plt.title("With noise")
+    plt.title("With noise", fontsize=24)
     plt.show()
 
 # ------------------------------ Question 10 ------------------------------ #
