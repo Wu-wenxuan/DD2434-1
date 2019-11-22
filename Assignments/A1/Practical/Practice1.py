@@ -1,8 +1,7 @@
 import pylab as pb
 import numpy as np
-from math import pi, exp
+from math import pi, exp, sin
 from scipy.stats import multivariate_normal as mv_norm
-# from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 from random import sample 
@@ -10,14 +9,14 @@ from random import sample
 # ------------------------------ Exercises Switch ------------------------------ #
 
 ex9 = False
-ex10 = True
-ex11 = False
+ex10 = False
+ex11 = True
 
 # ------------------------------ Functions ------------------------------ #
 
 figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
 
-def calculatePosterior(mean, variance, point_x, point_t):
+def calculatePosterior(mean, variance, point_x, point_t, sigma):
 
     beta = 1/sigma
     phi = np.array([np.repeat(1, len(point_x)),point_x])
@@ -42,15 +41,26 @@ def calculatePosterior(mean, variance, point_x, point_t):
 
     return new_mean, new_variance
 
-def secf(sigma, xi, xj, l):
+def calcKernel(sigma, xi, xj, l):
 
-    matrix = [[0 for x in range(len(xi))] for y in range(len(xj))] 
+    matrix = [[0 for x in range(len(xj))] for y in range(len(xi))] 
 
     for i in range(len(xi)):
         for j in range(len(xj)):
             matrix[i][j] = pow(sigma,2) * exp(- (np.dot(np.transpose(xi[i] - xj[j]), (xi[i] - xj[j])) / pow(l,2)))
 
     return np.array(matrix)
+
+def predPosterior(xi, X, f, sigma, sigmaf, l, noise):
+
+    if noise:
+        pred_mean = np.dot(np.dot(calcKernel(sigmaf, xi, X, l), np.linalg.inv(calcKernel(sigmaf, X, X, l) + sigma * np.identity(len(X)))), f)
+        pred_variance = calcKernel(sigmaf, xi, xi, l) - np.dot(np.dot(calcKernel(sigmaf, xi, X, l), np.linalg.inv(calcKernel(sigmaf, X, X, l) + sigma * np.identity(len(X)))), calcKernel(sigmaf, X, xi, l))
+    else:
+        pred_mean = np.dot(np.dot(calcKernel(sigmaf, xi, X, l), np.linalg.inv(calcKernel(sigmaf, X, X, l))), f)
+        pred_variance = calcKernel(sigmaf, xi, xi, l) - np.dot(np.dot(calcKernel(sigmaf, xi, X, l), np.linalg.inv(calcKernel(sigmaf, X, X, l))), calcKernel(sigmaf, X, xi, l))
+
+    return pred_mean, pred_variance
 
 # ------------------------------ Question 9 ------------------------------ #
 
@@ -106,7 +116,7 @@ if ex9:
         #auxvar = variance
         point_x = sample(x.tolist(), i)
         point_t = a1 * np.asarray(point_x) + a0 + np.random.normal(0, sigma, len(point_x))
-        mean, variance = calculatePosterior(mean, variance, point_x, point_t)
+        mean, variance = calculatePosterior(mean, variance, point_x, point_t, sigma)
         for j in range(5):
             smp_0, smp_1 = np.random.multivariate_normal(mean, variance)
             t_i = smp_1 * x + smp_0
@@ -131,7 +141,7 @@ if ex10:
     for i in range(len(x)):
         x[i] = round(x[i],2)
 
-    covariance = secf(sigma, x, x, l)
+    covariance = calcKernel(sigma, x, x, l)
 
     for i in range(10):
         prior = np.random.multivariate_normal(mean,covariance)
@@ -142,7 +152,57 @@ if ex10:
     plt.show()
     
 if ex11:
-    print(ex11)
+
+    sigma = 3
+    sigmaf = 1
+    l = 1
+    xi = np.array(np.arange(-10,10,0.1))
+    xi = np.transpose(xi)
+    X = [-4,-3,-2,-1,0,2,3,5]
+    X = np.transpose(X)
+
+    f_Noise = np.zeros(len(X))
+    t = np.zeros(len(xi))
+    t_noNoise = np.zeros(len(X))
+
+    for i in range(len(f_Noise)): # Points generated with noise
+        f_Noise[i] = (2 + pow((0.5 * X[i] - 1), 2)) * sin(3 * X[i]) + np.random.normal(0, sigma, 1)
+
+    for i in range(len(t)): # Line generated without noise
+        t[i] = (2 + pow((0.5 * xi[i] - 1), 2)) * sin(3 * xi[i])
+
+    for i in range(len(X)): # Points generated without noise
+        t_noNoise[i] = (2 + pow((0.5 * X[i] - 1), 2)) * sin(3 * X[i])
+
+    f_Noise = np.transpose(f_Noise)
+
+    noise = False
+
+    pred_mean, pred_variance = predPosterior(xi, X, t_noNoise, sigma, sigmaf, l, noise)
+
+    for i in range(10):
+        posterior = np.random.multivariate_normal(pred_mean,pred_variance)
+        plt.plot(xi,posterior)
+    plt.plot(xi, t)
+    plt.plot(X, t_noNoise, 'o', color='black')
+    plt.xlabel('$x$', fontsize=16)
+    plt.ylabel('$y$', fontsize=16)
+    plt.title("Without noise")
+    plt.show()
+
+    noise = True
+
+    pred_mean, pred_variance = predPosterior(xi, X, f_Noise, sigma, sigmaf, l, noise)
+
+    for i in range(10):
+        posterior = np.random.multivariate_normal(pred_mean,pred_variance)
+        plt.plot(xi,posterior)
+    plt.plot(xi, t)
+    plt.plot(X, f_Noise, 'o', color='black')
+    plt.xlabel('$x$', fontsize=16)
+    plt.ylabel('$y$', fontsize=16)
+    plt.title("With noise")
+    plt.show()
 
 # ------------------------------ Question 10 ------------------------------ #
 
