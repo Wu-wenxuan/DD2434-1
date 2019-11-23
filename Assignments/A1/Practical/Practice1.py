@@ -95,8 +95,6 @@ if ex9:
 
     # First iteration
 
-    f = mv_norm(mean,variance)
-
     w_0, w_1 = np.mgrid[-2.0:2.0:.01, -2.0:2.0:.01]
     pos = np.empty(w_0.shape + (2,))
     pos[:, :,0] = w_0
@@ -108,8 +106,6 @@ if ex9:
     plt.show()
 
     # Points calculation
-
-    #TODO: update or not mean and variance
 
     for i in range(1, 8):
         #auxmean = mean
@@ -127,6 +123,8 @@ if ex9:
             plt.title("Plot for %d points with sigma = %.2f" %(i, sigma))
         plt.plot(x,t, color='red')
         plt.show()
+
+# ------------------------------ Question 10 ------------------------------ #
 
 if ex10:
 
@@ -151,6 +149,8 @@ if ex10:
     plt.ylabel('$y$', fontsize=16)
     plt.show()
     
+# ------------------------------ Question 11 ------------------------------ #
+
 if ex11:
 
     sigma = 3
@@ -180,30 +180,40 @@ if ex11:
 
     pred_mean, pred_variance = predPosterior(xi, X, t_noNoise, sigma, sigmaf, l, noise)
 
+    uncertainty = 2 * np.sqrt(np.diag(pred_variance))
+
     for i in range(10):
         posterior = np.random.multivariate_normal(pred_mean,pred_variance)
         plt.plot(xi,posterior)
-    plt.plot(xi, t)
+    plt.fill_between(xi, pred_mean + uncertainty, pred_mean - uncertainty, alpha="0.2")
+    plt.plot(xi, pred_mean, linewidth=2, label="Mean")
+    plt.plot(xi, t, label="Original")
     plt.plot(X, t_noNoise, 'o', color='black')
+    plt.xlim(left=-10, right=10)
+    plt.ylim(top=12.5, bottom=-12.5)
     plt.xlabel('$x$', fontsize=16)
     plt.ylabel('$y$', fontsize=16)
     plt.title("Without noise", fontsize=24)
+    plt.legend(loc=3)
     plt.show()
 
     noise = True
 
     pred_mean, pred_variance = predPosterior(xi, X, f_Noise, sigma, sigmaf, l, noise)
 
+    uncertainty = 2 * np.sqrt(np.diag(pred_variance))
+
     for i in range(10):
         posterior = np.random.multivariate_normal(pred_mean,pred_variance)
         plt.plot(xi,posterior)
-    plt.plot(xi, t)
+    plt.fill_between(xi, pred_mean + uncertainty, pred_mean - uncertainty, alpha="0.2")
+    plt.plot(xi, pred_mean, linewidth=2, label="Mean")
+    plt.plot(xi, t, label="Original")
     plt.plot(X, f_Noise, 'o', color='black')
+    plt.xlim(left=-10, right=10)
+    plt.ylim(top=12.5, bottom=-12.5)
     plt.xlabel('$x$', fontsize=16)
     plt.ylabel('$y$', fontsize=16)
     plt.title("With noise", fontsize=24)
+    plt.legend(loc=3)
     plt.show()
-
-# ------------------------------ Question 10 ------------------------------ #
-
-# ------------------------------ Question 11 ------------------------------ #
