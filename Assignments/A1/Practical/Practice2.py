@@ -73,7 +73,7 @@ def genA(sigma):
     return A
 
 sigma = 1
-x = np.arange(0,4*math.pi,(4*math.pi)/30)
+x = np.arange(0,4*math.pi,(4*math.pi)/100)
 A = genA(sigma)
 
 val = genNonLinear(x)
