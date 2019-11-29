@@ -4,7 +4,6 @@ import scipy.stats
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
-from concurrent import futures
 import multiprocessing
 from joblib import Parallel, delayed
 
@@ -12,7 +11,7 @@ from joblib import Parallel, delayed
 
 ITERATIONS = pow(10,4)
 
-def displayGrid(gridnum):
+def displayGrid(gridnum, title):
 
     fig, ax = plt.subplots()
 
@@ -28,12 +27,12 @@ def displayGrid(gridnum):
             else:
                 c = 'o'
                 ax.text(i-1, j-1, c, va='center', ha='center', fontsize=50, color='b')            
-
     ax.set_xlim(min_val, max_val)
     ax.set_ylim(min_val, max_val)
     ax.set_xticks(ind_array)
     ax.set_yticks(ind_array)
     ax.grid()
+    plt.title(title, fontsize=18)
     plt.show()
 
 def M0():
@@ -61,16 +60,16 @@ def M2(dataset, param1, param2):
     for i in range(dataset.shape[0]):
         for j in range(dataset.shape[1]):
 
-            x1 = 1
-            x2 = 1
+            x1 = 0
+            x2 = 0
             if j == 0:
-                x = -1
+                x1 = -1
             elif j == 2:
-                x = 2
+                x1 = 1
             if i == 2:
                 x2 = -1
-            elif i == 1:
-                x2 = 0
+            elif i == 0:
+                x2 = 1
 
             result *= (1 / (1 + exp(-dataset[i][j] * (param1 * x1 + param2 * x2))))
             
@@ -82,16 +81,16 @@ def M3(dataset, param1, param2, param3):
     for i in range(dataset.shape[0]):
         for j in range(dataset.shape[1]):
 
-            x1 = 1
-            x2 = 1
+            x1 = 0
+            x2 = 0
             if j == 0:
-                x = -1
+                x1 = -1
             elif j == 2:
-                x = 2
+                x1 = 1
             if i == 2:
                 x2 = -1
-            elif i == 1:
-                x2 = 0
+            elif i == 0:
+                x2 = 1
 
             result *= (1 / (1 + exp(-dataset[i][j] * (param1 * x1 + param2 * x2 + param3))))
             
@@ -102,7 +101,7 @@ def getParameter(model):
     variance = pow(10,2) * np.identity(model)
     return np.random.multivariate_normal(mean,variance)
 
-def computeModels(results, i):
+def computeModels(results, dataset, i):
 
     results[i][0] = 1/512
 
@@ -110,15 +109,18 @@ def computeModels(results, i):
         for k in (range(ITERATIONS)):          
             if j == 1:
                 theta = getParameter(j)
-                results[i][j] += M1(dataset[i], theta)
+                results[i][j] += M1(dataset, theta)
+                continue
 
             elif j == 2:
                 theta = getParameter(j)
-                results[i][j] += M2(dataset[i], theta[0], theta[1])
+                results[i][j] += M2(dataset, theta[0], theta[1])
+                continue
 
             else:
                 theta = getParameter(j)
-                results[i][j] += M3(dataset[i], theta[0], theta[1], theta[2])
+                results[i][j] += M3(dataset, theta[0], theta[1], theta[2])
+                continue
 
         results[i][j] = results[i][j] / ITERATIONS
 
@@ -139,7 +141,7 @@ for i in range(len(dataset)):
 results = np.zeros((len(dataset), 4))
 
 num_cores = multiprocessing.cpu_count() # Parallel code for computing models avg. probabilities
-results = Parallel(n_jobs=num_cores)(delayed(computeModels)(results, i) for i in tqdm(range(results.shape[0])))
+results = Parallel(n_jobs=num_cores)(delayed(computeModels)(results, dataset[i], i) for i in tqdm(range(results.shape[0])))
 
 results = np.transpose(results)
 evidence_sum = np.zeros(shape=(results.shape[1]))
@@ -174,3 +176,21 @@ plt.xlabel('$Sample$', fontsize=12)
 plt.ylabel('$Probability$', fontsize=12)
 plt.legend(loc=1)
 plt.show()
+
+for i in range(results.shape[1]):
+    plt.plot(results[finalresult,i], drawstyle="steps", label=f"Model {i}")
+plt.xlim(right=100)
+plt.xlabel('$Sample$', fontsize=12)
+plt.ylabel('$Probability$', fontsize=12)
+plt.legend(loc=1)
+plt.show()
+
+results = np.transpose(results)
+
+for i in range(results.shape[0]):
+    title = "Maximum sample in model M{}".format(i)
+    displayGrid(results[i].argmax(), title)
+    title = "Minimum sample in model M{}".format(i)
+    displayGrid(results[i].argmin(), title)
+
+
