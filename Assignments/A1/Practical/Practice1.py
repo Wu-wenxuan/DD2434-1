@@ -153,7 +153,7 @@ if ex10:
 
 if ex11:
 
-    sigma = 3
+    sigma = 0.3
     sigmaf = 1
     l = 1
     xi = np.array(np.arange(-10,10,0.1))
