@@ -98,7 +98,10 @@ def M3(dataset, param1, param2, param3):
 
 def getParameter(model):
     mean = np.zeros(model)
+    #mean = 5 * np.ones(model) Uncoment for mean 5
     variance = pow(10,2) * np.identity(model)
+    #variance = np.random.rand(model,model)
+    #variance = pow(10,2) * np.dot(variance, np.transpose(variance)) Uncoment for semi-definite random covariance
     return np.random.multivariate_normal(mean,variance)
 
 def computeModels(results, dataset, i):
