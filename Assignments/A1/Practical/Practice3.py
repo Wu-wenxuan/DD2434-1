@@ -45,9 +45,9 @@ def M1(dataset, param):
         for j in range(dataset.shape[1]):
             
             x = 0
-            if j == 0:
+            if i == 0:
                 x = -1
-            elif j == 2:
+            elif i == 2:
                 x = 1
 
             result *= (1 / (1 + exp(-dataset[i][j] * param * x)))
@@ -62,13 +62,13 @@ def M2(dataset, param1, param2):
 
             x1 = 0
             x2 = 0
-            if j == 0:
+            if i == 0:
                 x1 = -1
-            elif j == 2:
+            elif i == 2:
                 x1 = 1
-            if i == 2:
+            if j == 2:
                 x2 = -1
-            elif i == 0:
+            elif j == 0:
                 x2 = 1
 
             result *= (1 / (1 + exp(-dataset[i][j] * (param1 * x1 + param2 * x2))))
@@ -83,13 +83,13 @@ def M3(dataset, param1, param2, param3):
 
             x1 = 0
             x2 = 0
-            if j == 0:
+            if i == 0:
                 x1 = -1
-            elif j == 2:
+            elif i == 2:
                 x1 = 1
-            if i == 2:
+            if j == 2:
                 x2 = -1
-            elif i == 0:
+            elif j == 0:
                 x2 = 1
 
             result *= (1 / (1 + exp(-dataset[i][j] * (param1 * x1 + param2 * x2 + param3))))
@@ -97,8 +97,8 @@ def M3(dataset, param1, param2, param3):
     return result
 
 def getParameter(model):
-    mean = np.zeros(model)
-    #mean = 5 * np.ones(model) Uncoment for mean 5
+    #mean = np.zeros(model)
+    mean = 5 * np.ones(model) #Uncoment for mean 5
     variance = pow(10,2) * np.identity(model)
     #variance = np.random.rand(model,model)
     #variance = pow(10,2) * np.dot(variance, np.transpose(variance)) Uncoment for semi-definite random covariance
