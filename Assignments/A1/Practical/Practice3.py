@@ -44,13 +44,13 @@ def M1(dataset, param):
     for i in range(dataset.shape[0]):
         for j in range(dataset.shape[1]):
             
-            x = 0
-            if i == 0:
-                x = -1
-            elif i == 2:
-                x = 1
+            x1 = 0
+            if j == 0:
+                x1 = -1
+            elif j == 2:
+                x1 = 1
 
-            result *= (1 / (1 + exp(-dataset[i][j] * param * x)))
+            result *= (1 / (1 + exp(-dataset[i][j] * param * x1)))
             
     return result
 
@@ -62,14 +62,14 @@ def M2(dataset, param1, param2):
 
             x1 = 0
             x2 = 0
-            if i == 0:
+            if j == 0:
                 x1 = -1
-            elif i == 2:
+            elif j == 2:
                 x1 = 1
-            if j == 2:
-                x2 = -1
-            elif j == 0:
+            if i == 0:
                 x2 = 1
+            elif i == 2:
+                x2 = -1
 
             result *= (1 / (1 + exp(-dataset[i][j] * (param1 * x1 + param2 * x2))))
             
@@ -83,49 +83,41 @@ def M3(dataset, param1, param2, param3):
 
             x1 = 0
             x2 = 0
-            if i == 0:
+            if j == 0:
                 x1 = -1
-            elif i == 2:
+            elif j == 2:
                 x1 = 1
-            if j == 2:
-                x2 = -1
-            elif j == 0:
+            if i == 0:
                 x2 = 1
+            elif i == 2:
+                x2 = -1
 
             result *= (1 / (1 + exp(-dataset[i][j] * (param1 * x1 + param2 * x2 + param3))))
             
     return result
 
-def getParameter(model):
-    #mean = np.zeros(model)
-    mean = 5 * np.ones(model) #Uncoment for mean 5
-    variance = pow(10,2) * np.identity(model)
-    #variance = np.random.rand(model,model)
-    #variance = pow(10,2) * np.dot(variance, np.transpose(variance)) Uncoment for semi-definite random covariance
-    return np.random.multivariate_normal(mean,variance)
+def getDistribution():
+    mean = np.zeros(3)
+    #mean = 5 * np.ones(3) #Uncoment for mean 5
+    #variance = pow(10,2) * np.identity(3)
+    variance = np.random.rand(3,3) #Uncoment for semi-definite random covariance
+    variance = pow(10,2) * np.dot(variance, np.transpose(variance)) #Uncoment for semi-definite random covariance
+    
+    return mean, variance
 
-def computeModels(results, dataset, i):
+def computeModels(results, dataset, i, mean, variance):
 
-    results[i][0] = 1/512
+    results[i][0] = M0()
 
-    for j in range(1, results.shape[1]):
-        for k in (range(ITERATIONS)):          
-            if j == 1:
-                theta = getParameter(j)
-                results[i][j] += M1(dataset, theta)
-                continue
+    for k in (range(ITERATIONS)):          
+        theta = np.random.multivariate_normal(mean,variance)
+        results[i][1] += M1(dataset, theta[0])
+        results[i][2] += M2(dataset, theta[0], theta[1])
+        results[i][3] += M3(dataset, theta[0], theta[1], theta[2])
 
-            elif j == 2:
-                theta = getParameter(j)
-                results[i][j] += M2(dataset, theta[0], theta[1])
-                continue
-
-            else:
-                theta = getParameter(j)
-                results[i][j] += M3(dataset, theta[0], theta[1], theta[2])
-                continue
-
-        results[i][j] = results[i][j] / ITERATIONS
+    results[i][1] = results[i][1] / ITERATIONS
+    results[i][2] = results[i][2] / ITERATIONS
+    results[i][3] = results[i][3] / ITERATIONS
 
     return results[i]
 
@@ -142,9 +134,9 @@ for i in range(len(dataset)):
     dataset[i] = np.reshape(np.array(dataset[i]), (3,3))
 
 results = np.zeros((len(dataset), 4))
-
+mean, variance = getDistribution()
 num_cores = multiprocessing.cpu_count() # Parallel code for computing models avg. probabilities
-results = Parallel(n_jobs=num_cores)(delayed(computeModels)(results, dataset[i], i) for i in tqdm(range(results.shape[0])))
+results = Parallel(n_jobs=num_cores)(delayed(computeModels)(results, dataset[i], i, mean, variance) for i in tqdm(range(results.shape[0])))
 
 results = np.transpose(results)
 evidence_sum = np.zeros(shape=(results.shape[1]))
