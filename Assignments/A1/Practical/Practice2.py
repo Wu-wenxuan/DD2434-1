@@ -74,12 +74,14 @@ def genA(sigma):
 
 sigma = 1
 x = np.arange(0,4*math.pi,(4*math.pi)/100)
-A = genA(sigma)
-
 val = genNonLinear(x)
 val = np.transpose(val)
 plt.plot(val[0],val[1], 'o')
 
+x = np.arange(0,4*math.pi,(4*math.pi)/500)
+val = genNonLinear(x)
+val = np.transpose(val)
+A = genA(sigma)
 val = np.transpose(val)
 Y = genLinear(val, A)
 
