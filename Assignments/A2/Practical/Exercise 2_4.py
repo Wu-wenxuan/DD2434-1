@@ -24,13 +24,13 @@ def compute_bN(a_0, b_0, vector, mu_N, mu_0, tau_N):
 if __name__ == "__main__":
 
     # VARIABLES
-    iterations = 10                 # Number of iterations
-    n = 100                         # Number of samples
-    mu_0 = 0                        # Initial value mu_0
-    mu_N = 0                        # Initial value mu_N
-    tau_0 = 0                       # Initial value tau_0
-    tau_N = 0                       # Initial value mu_N
-    a_0 = 0                         # Initial value a_0
+    iterations = 100                # Number of iterations
+    n = 10                          # Number of samples
+    mu_0 = 1                        # Initial value mu_0
+    mu_N = 1                        # Initial value mu_N
+    tau_0 = 1                       # Initial value tau_0
+    tau_N = 1                       # Initial value mu_N
+    a_0 = 1                         # Initial value a_0
     a_N = 1                         # Initial value a_N
     b_0 = 1                         # Initial value b_0
     b_N = 1                         # Initial value b_N
@@ -54,6 +54,15 @@ if __name__ == "__main__":
             q_mu = stats.norm(mu_N, 1/tau_N).pdf(x_axis[i])
             q_tau = stats.gamma.pdf(y_axis[j], a_N, loc=0, scale=(1/b_N))
             q_mu_tau[i][j] = q_mu * q_tau
-            
-    plt.contour(x_axis, y_axis, q_mu_tau)
+    '''
+    q_mu_tau_original = np.zeros((len(x_axis), len(y_axis)))
+
+    for i in tqdm(range(len(x_axis))):
+        for j in range(len(y_axis)):
+            q_mu = stats.norm(mu_0, 1/tau_0).pdf(x_axis[i])
+            q_tau = stats.gamma.pdf(y_axis[j], a_0, loc=0, scale=(1/b_0))
+            q_mu_tau_original[i][j] = q_mu * q_tau
+    '''        
+    plt.contour(x_axis, y_axis, q_mu_tau, colors='red')
+    #plt.contour(x_axis, y_axis, q_mu_tau_original, colors='green')
     plt.show()
