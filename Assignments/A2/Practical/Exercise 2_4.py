@@ -61,8 +61,8 @@ if __name__ == "__main__":
     a_N = 1                         # Initial value a_N
     b_0 = 1                         # Initial value b_0
     b_N = 1                         # Initial value b_N
-    mu_axis = np.linspace(-5,5,100)  # X axis grid
-    tau_axis = np.linspace(0,5,100)  # Y axis grid
+    mu_axis = np.linspace(-1,1,100)  # X axis grid
+    tau_axis = np.linspace(0,2,100)  # Y axis grid
 
     # SAMPLES GENERATION
     vector = np.random.normal(0,1,n)
