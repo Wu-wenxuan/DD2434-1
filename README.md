@@ -1,5 +1,7 @@
-# KTH Advanced Machine Learning
-KTH _Machine Learning, Advanced Course_ assignments
+# DD2434 - Machine Learning Advanced
+
+Projects of the KTH DD2434 - Machine Learning Advanced course.
+
 
 * Assignment 1:
 
